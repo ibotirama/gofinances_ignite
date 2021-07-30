@@ -1,4 +1,8 @@
-import React from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useEffect, useState } from "react";
+import 'intl';
+import { Platform } from "react-native";
+import "intl/locale-data/jsonp/pt-BR";
 
 import { HighlightCard } from "../../components/HighlightCard";
 import { TransactionCard, TransactionCardProps } from "../../components/TransactionCard";
@@ -24,41 +28,49 @@ export interface DataListProps extends TransactionCardProps {
   id: string;
 }
 
-export function Dashboard() {
-  const data: DataListProps[] = [{
-    id: '1',
-    type: 'positive',
-    title: "Desenvolvimento de site",
-    amount: "R$ 10.000,00",
-    category: {
-      name: 'Vendas',
-      icon: 'dollar-sign'
-    },
-    date: "13/04/2020",
-  },
-  {
-    id: '2',
-    type: "negative",
-    title: "Aluguel",
-    amount: "R$ 1.200,00",
-    category: {
-      name: 'Casa',
-      icon: 'shopping-bag'
-    },
-    date: "13/04/2020",
-  },
-  {
-    id: '31',
-    type: "negative",
-    title: "Hamburgueria Pizzy",
-    amount: "R$ 59,00",
-    category: {
-      name: 'Alimentação',
-      icon: 'coffee'
-    },
-    date: "13/04/2020",
+if (Platform.OS === "android") {
+  // See https://github.com/expo/expo/issues/6536 for this issue.
+  if (typeof (Intl as any).__disableRegExpRestore === "function") {
+      (Intl as any).__disableRegExpRestore();
   }
-  ];
+}
+
+export function Dashboard() {
+  const [data, SetData] = useState<DataListProps[]>()
+
+  async function loadTransactions() {
+    const dataKey = "@gofinances:transactions";
+    const response = await AsyncStorage.getItem(dataKey);
+    const transactions = response ? JSON.parse(response) : [];
+
+    const transactionsFormatted: DataListProps[] = transactions.map((item: DataListProps) => {
+      const amount = Number(item.amount).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      });
+
+      const dateFormatted = Intl.DateTimeFormat('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: '2-digit',
+      }).format(new Date(item.date));
+
+      return {
+        id: item.id,
+        name: item.name,
+        amount,
+        type: item.type,
+        category: item.category,
+        date: dateFormatted,
+      }
+    });
+
+    SetData(transactionsFormatted);
+  }
+
+  useEffect(() => {
+    loadTransactions();
+  }, []);
 
   return (
     <Container>
@@ -74,7 +86,7 @@ export function Dashboard() {
             </User>
           </UserInfo>
 
-          <LogoutButton onPress={() => {}}>
+          <LogoutButton onPress={() => { }}>
             <Icon name="power" />
           </LogoutButton>
         </UserWrapper>

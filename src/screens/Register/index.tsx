@@ -47,8 +47,6 @@ const schema = Yup.object().shape({
     .required('O valor é obrigatório'),
 });
 
-const dataKey = "@gofinances:transactions";
-
 export function Register() {
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [transactionType, setTransactionType] = useState('');
@@ -98,6 +96,8 @@ export function Register() {
     }
 
     try {
+const dataKey = "@gofinances:transactions";
+
       const data = await AsyncStorage.getItem(dataKey);
       const currentData = data !== null ? JSON.parse(data) : [];
       const dataFormatted = [
