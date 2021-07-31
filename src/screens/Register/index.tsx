@@ -1,22 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from 'react';
 import {
   Modal,
   TouchableWithoutFeedback,
   Keyboard,
   Alert
-} from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from '@react-navigation/native';
-import { useForm } from 'react-hook-form';
+} from 'react-native';
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import uuid from 'react-native-uuid';
 
-import { InputForm } from "../../components/Forms/InputForm";
-import { Button } from "../../components/Forms/Button";
+import { useForm } from 'react-hook-form';
+import { useNavigation } from '@react-navigation/native';
 
-import { TransactionTypeButton } from "../../components/Forms/TransactionTypeButton";
-import { CategorySelectButton } from "../../components/CategorySelectButton";
+import { InputForm } from '../../components/Forms/InputForm';
+import { Button } from '../../components/Forms/Button';
+import { TransactionTypeButton } from '../../components/Forms/TransactionTypeButton';
+import { CategorySelectButton } from '../../components/Forms/CategorySelectButton';
 
 import { CategorySelect } from '../CategorySelect';
 
@@ -26,34 +26,32 @@ import {
   Title,
   Form,
   Fields,
-  TransactionsType,
-} from "./styles";
+  TransactionsTypes
+} from './styles';
 
 interface FormData {
   name: string;
-  amount: string;
-  transactionType: string;
-  category: string;
+  amount: string;  
 }
 
 const schema = Yup.object().shape({
   name: Yup
-    .string()
-    .required('Nome é obrigatório'),
+  .string()
+  .required('Nome é obrigatório'),
   amount: Yup
-    .number()
-    .typeError('Informe um valor numérico')
-    .positive('O valor não pode ser negativo')
-    .required('O valor é obrigatório'),
+  .number()
+  .typeError('Informe um valor númerico')
+  .positive('O valor não pode ser negativo')
+  .required('O valor é obrigatório'),
 });
 
-export function Register() {
-  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+export function Register(){
   const [transactionType, setTransactionType] = useState('');
-
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+  
   const [category, setCategory] = useState({
     key: 'category',
-    name: 'Categoria',
+    name: 'Categoria'
   });
 
   const navigation = useNavigation();
@@ -61,30 +59,31 @@ export function Register() {
   const {
     control,
     handleSubmit,
-    formState: { errors },
     reset,
-  } = useForm({ resolver: yupResolver(schema) });
+    formState: { errors }
+  } = useForm({
+    resolver: yupResolver(schema)
+  });
 
-  function handleTransactionTypeSelect(type: 'positive' | 'negative') {
+  function handleTransactionsTypeSelect(type: 'positive' | 'negative'){
     setTransactionType(type);
   }
 
-  function handleOpenSelectCategoryModal() {
+  function handleOpenSelectCategoryModal(){
     setCategoryModalOpen(true);
   }
 
-  function handleCloseSelectCategoryModal() {
+  function handleCloseSelectCategoryModal(){
     setCategoryModalOpen(false);
   }
 
-  async function handleRegister(form: FormData) {
-    if (!transactionType) {
-      return Alert.alert('Selecione o tipo de transação');
-    }
+  async function handleRegister(form: FormData){
+    if(!transactionType)
+      return Alert.alert('Selecione o tipo da transação');
 
-    if (category.key === 'category') {
+    if(category.key === 'category')
       return Alert.alert('Selecione a categoria');
-    }
+
 
     const newTransaction = {
       id: String(uuid.v4()),
@@ -96,10 +95,11 @@ export function Register() {
     }
 
     try {
-const dataKey = "@gofinances:transactions";
+      const dataKey = '@gofinances:transactions';
 
       const data = await AsyncStorage.getItem(dataKey);
-      const currentData = data !== null ? JSON.parse(data) : [];
+      const currentData = data ? JSON.parse(data) : [];
+
       const dataFormatted = [
         ...currentData,
         newTransaction
@@ -111,22 +111,21 @@ const dataKey = "@gofinances:transactions";
       setTransactionType('');
       setCategory({
         key: 'category',
-        name: 'Categoria',
+        name: 'Categoria'
       });
 
       navigation.navigate('Listagem');
-
+      
     } catch (error) {
       console.log(error);
-      Alert.alert('Não foi possível salvar dados');
+      Alert.alert("Não foi possível salvar");
     }
   }
 
   return (
-    <TouchableWithoutFeedback
-      onPress={Keyboard.dismiss}
-    >
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <Container>
+
         <Header>
           <Title>Cadastro</Title>
         </Header>
@@ -150,20 +149,20 @@ const dataKey = "@gofinances:transactions";
               error={errors.amount && errors.amount.message}
             />
 
-            <TransactionsType>
+            <TransactionsTypes>
               <TransactionTypeButton
-                title='Income'
-                type='up'
-                onPress={() => handleTransactionTypeSelect('positive')}
+                type="up"
+                title="Income"
+                onPress={() => handleTransactionsTypeSelect('positive')}
                 isActive={transactionType === 'positive'}
               />
               <TransactionTypeButton
-                title='Outcome'
-                type='down'
-                onPress={() => handleTransactionTypeSelect('negative')}
+                type="down"
+                title="Outcome"
+                onPress={() => handleTransactionsTypeSelect('negative')}
                 isActive={transactionType === 'negative'}
               />
-            </TransactionsType>
+            </TransactionsTypes>
 
             <CategorySelectButton
               title={category.name}
@@ -179,13 +178,12 @@ const dataKey = "@gofinances:transactions";
 
         <Modal visible={categoryModalOpen}>
           <CategorySelect
-            category={category}
-            closeSelectCategory={handleCloseSelectCategoryModal}
-            setCategory={setCategory}
+              category={category}
+              setCategory={setCategory}
+              closeSelectCategory={handleCloseSelectCategoryModal}
           />
         </Modal>
-
       </Container>
-    </TouchableWithoutFeedback>
+    </TouchableWithoutFeedback>      
   );
 }
