@@ -29,24 +29,26 @@ export function SignIn() {
   async function handleSignInWithGoogle() {
     try {
       setLoading(true);
-      const response = await signInWithGoogle();
-      setLoading(false);
-      return response;
+       return await signInWithGoogle();
     } catch (error) {
       console.log(error);
       Alert.alert('Não foi possível conectar a conta Google');
+      // In case of error will set true to enabled the buttons, but in case of 
+      // success does not matter because I will move to another screen, what changes nothing.
+      setLoading(false);
     }
   }
 
   async function handleSignInWithApple() {
     try {
       setLoading(true);
-      const response = await signInWithApple();
-      setLoading(false);
-      return response;
+      return await signInWithApple();
     } catch (error) {
       console.log(error);
       Alert.alert('Não foi possível conectar a conta Apple');
+      // In case of error will set true to enabled the buttons, but in case of 
+      // success does not matter because I will move to another screen, what changes nothing.
+      setLoading(false);
     }
   }
 
