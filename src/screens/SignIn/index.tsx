@@ -1,7 +1,5 @@
-import React from 'react';
-import { useState } from 'react';
-import { ActivityIndicator } from 'react-native';
-import { Alert } from 'react-native';
+import React, { useState } from 'react';
+import { ActivityIndicator, Alert, Platform } from 'react-native';
 import { RFValue } from 'react-native-responsive-fontsize';
 
 import AppleSvg from '../../assets/apple.svg';
@@ -23,32 +21,32 @@ import {
 } from './styles';
 
 export function SignIn() {
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { signInWithGoogle, signInWithApple } = useAuth();
 
   async function handleSignInWithGoogle() {
     try {
-      setLoading(true);
+      setIsLoading(true);
        return await signInWithGoogle();
     } catch (error) {
       console.log(error);
       Alert.alert('Não foi possível conectar a conta Google');
       // In case of error will set true to enabled the buttons, but in case of 
       // success does not matter because I will move to another screen, what changes nothing.
-      setLoading(false);
+      setIsLoading(false);
     }
   }
 
   async function handleSignInWithApple() {
     try {
-      setLoading(true);
+      setIsLoading(true);
       return await signInWithApple();
     } catch (error) {
       console.log(error);
       Alert.alert('Não foi possível conectar a conta Apple');
       // In case of error will set true to enabled the buttons, but in case of 
       // success does not matter because I will move to another screen, what changes nothing.
-      setLoading(false);
+      setIsLoading(false);
     }
   }
 
@@ -80,17 +78,20 @@ export function SignIn() {
             title="Entrar com Google"
             svg={GoogleSvg}
             onPress={handleSignInWithGoogle}
-            enabled={!loading}
+            enabled={!isLoading}
           />
 
-          <SignInSocialButton
-            title="Entrar com Apple"
-            svg={AppleSvg}
-            onPress={handleSignInWithApple}
-            enabled={!loading}
-          />
+          {
+            Platform.OS === 'ios' && 
+            <SignInSocialButton
+              title="Entrar com Apple"
+              svg={AppleSvg}
+              onPress={handleSignInWithApple}
+              enabled={!isLoading}
+            />
+          }
 
-          {loading && (
+          {isLoading && (
             <ActivityIndicator
               style={{ marginTop: 18 }}
               color={theme.colors.shape}
